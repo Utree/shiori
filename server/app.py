@@ -1,7 +1,45 @@
-from flask import Flask
+from fastapi import FastAPI
+from pydantic import BaseModel
 
-app = Flask(__name__)
+app = FastAPI()
 
-@app.route("/")
-def hello_world():
-	return "Hello, World!"
+
+class LoginInfo(BaseModel):
+    email: str
+    password: str
+
+
+class SignupInfo(BaseModel):
+    name: str
+    email: str
+    password: str
+
+
+@app.get('/')  # methodとendpointの指定
+async def hello():
+    return {"text": "hello world!"}
+
+
+@app.post("/login")
+async def login(user: LoginInfo):
+    """ ログイン
+    """
+    # TODO: ログイン処理を実装
+    email = user.email
+    password = user.password
+    print(f"DEBUG[login]\temail: {email}, passwd: {password}")
+
+    return {'access_token': "#####"}
+
+
+@app.post("/signup")
+async def signup(user: SignupInfo):
+    """ サインアップ
+    """
+    # TODO: サインアップ処理を実装
+    name = user.name
+    email = user.email
+    password = user.password
+    print(f"DEBUG[login]\tname: {name}, email: {email}, passwd: {password}")
+
+    return {'access_token': "#####"}
