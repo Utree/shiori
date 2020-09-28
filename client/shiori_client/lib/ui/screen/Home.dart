@@ -1,30 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shiori_client/ui/component/AppTheme.dart';
-import 'dart:math';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Home extends StatefulWidget {
   _Home createState() => _Home();
 }
 
+class TravelItem {
+  int id;
+  String name;
+  String createdAt;
+  String thumbnailUrl;
+
+  TravelItem(this.id, this.name, this.createdAt, this.thumbnailUrl);
+
+  TravelItem.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    createdAt = json['created_at'];
+    thumbnailUrl = json['thumbnail_url'];
+  }
+}
+
+Future<List<TravelItem>> initHome() async {
+  final prefs = await SharedPreferences.getInstance();
+  final ac_tkn = prefs.getString('access_token') ?? "not found";
+  print("access_token: " + ac_tkn);
+  final List<TravelItem> response = await http.get(
+    AppTheme.ApiIP + '/travels',
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer ' + ac_tkn,
+    }
+  ).then((value) {
+    String responseBody = utf8.decode(value.bodyBytes);  // UTF-8に変換
+    var tagObjsJson = json.decode(responseBody)['data'] as List;
+    return tagObjsJson.map((tagJson) => TravelItem.fromJson(tagJson)).toList();
+  });
+  return response;
+}
+
 class _Home extends State<Home> with TickerProviderStateMixin {
   AnimationController controller;
+  Future<List<TravelItem>> _travelItem;
 
   @override
   Future<void> initState() {
     super.initState();
     controller = AnimationController(duration: const Duration(seconds: 5), vsync: this);
-    _loadCounter();
-  }
-
-  _loadCounter() async {
-    // read data
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      final act_tkn = prefs.getString('access_token') ?? "not found";
-      print("access_token: " + act_tkn);
-    });
+    _travelItem = initHome();
   }
 
   @override
@@ -35,8 +61,6 @@ class _Home extends State<Home> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final list = [];
-    var rng = new Random();
     final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
 
     return Scaffold(
@@ -53,32 +77,41 @@ class _Home extends State<Home> with TickerProviderStateMixin {
         ),
         backgroundColor: AppTheme.beige,
       ),
-      body: ListView.builder(
-        itemBuilder: (BuildContext _, int index) {
-          // アイテムが追いつかなくなったらリストを追加
-          if (index >= list.length) {
-            list.addAll(generateWordPairs().take(10));
-          }
-          // アニメーションの設定
-          final int count = list.length > 10 ? 10 : list.length;
-          final Animation<double> animation =
-          Tween<double>(begin: 0.0, end: 1.0).animate(
-              CurvedAnimation(
-                  parent: controller,
-                  curve: Interval((1 / count*1.5) * index, 1.0,
-                      curve: Curves.fastOutSlowIn)
-              )
-          );
-          controller.forward();
-          // レイアウトを設定
-          return HomeListView(
-            controller: controller,
-            animation: animation,
-            title: list[index],
-            imageNumber: rng.nextInt(100),
-            index: index,
-          );
-        },
+      body: FutureBuilder<List<TravelItem>>(
+        future: _travelItem,
+          builder: (context, snapshot) {
+          // network check
+            if(snapshot.connectionState == ConnectionState.done) {
+              if(snapshot.data.isNotEmpty) {
+                return ListView.builder(
+                  itemCount: snapshot.data.length,
+                  itemBuilder: (BuildContext _, int index) {
+                    // アニメーションの設定
+                    final int count = snapshot.data.length > 10 ? 10 : snapshot.data.length;
+                    final Animation<double> animation =
+                    Tween<double>(begin: 0.0, end: 1.0).animate(
+                        CurvedAnimation(
+                            parent: controller,
+                            curve: Interval((1 / count*1.5) * index, 1.0,
+                                curve: Curves.fastOutSlowIn)
+                        )
+                    );
+                    controller.forward();
+                    // レイアウトを設定
+                    return HomeListView(
+                      controller: controller,
+                      animation: animation,
+                      travelData: snapshot.data[index]
+                    );
+                  },
+                );
+              } else {
+                return CircularProgressIndicator();
+              }
+            } else {
+              return CircularProgressIndicator();
+            }
+          },
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
@@ -92,16 +125,13 @@ class HomeListView extends StatelessWidget {
   // Home画面中listのアニメーション
   final AnimationController controller;
   final Animation<double> animation;
-  final int imageNumber, index;
-  final WordPair title;
+  final TravelItem travelData;
 
   const HomeListView({
     Key key,
     @required this.controller,
     @required this.animation,
-    @required this.imageNumber,
-    @required this.title,
-    @required this.index
+    @required this.travelData,
 
   }) : super(key: key);
 
@@ -115,7 +145,7 @@ class HomeListView extends StatelessWidget {
           child: Transform(
             transform: Matrix4.translationValues(
                 0.0, 50 * (1.0 - animation.value), 0.0),
-            child: HomeItemWidget(title: title.asPascalCase, imageNumber: imageNumber),
+            child: HomeItemWidget(travelData: travelData),
           ),
         );
       },
@@ -124,13 +154,10 @@ class HomeListView extends StatelessWidget {
 }
 
 class HomeItemWidget extends StatelessWidget {
-  // Home画面中list itemの画像と文字のレイアウト
-  String title;
-  int imageNumber;
+  final TravelItem travelData;
 
   HomeItemWidget({
-    @required this.title,
-    @required this.imageNumber
+    @required this.travelData,
   });
 
   @override
@@ -157,10 +184,7 @@ class HomeItemWidget extends StatelessWidget {
                   children: <Widget>[
                     AspectRatio(
                         aspectRatio: 2, // 画像のアスペクト比
-                        child: Image.network(
-                          'https://picsum.photos/250?image=' + this.imageNumber.toString(),
-                          fit: BoxFit.cover,
-                        )
+                        child: Image.network(travelData.thumbnailUrl, fit: BoxFit.cover)
                     ),
                     Container(  // テキストエリア
                       color: Colors.white, // 背景色
@@ -172,8 +196,8 @@ class HomeItemWidget extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Text(title, style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
-                                Text("2020/01/01")
+                                Text(travelData.name, style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+                                Text(travelData.createdAt)
                               ],
                             ),
                           ),
@@ -188,8 +212,8 @@ class HomeItemWidget extends StatelessWidget {
         ),
       ),
       onTap: (){
-        print(title + "called");
-        Navigator.of(context).pushNamed('/booklet', arguments: title+" called"); // ページ遷移
+        print(travelData.name + "called");
+        Navigator.of(context).pushNamed('/booklet', arguments: travelData.name+" called"); // ページ遷移
         },
     );
   }
