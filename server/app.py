@@ -5,17 +5,19 @@ app = FastAPI()
 
 
 class LoginInfo(BaseModel):
+    """ ログイン時要求項目"""
     email: str
     password: str
 
 
 class SignupInfo(BaseModel):
+    """ サインアップ時要求項目"""
     name: str
     email: str
     password: str
 
 
-@app.get('/')  # methodとendpointの指定
+@app.get('/')
 async def hello():
     return {"text": "hello world!"}
 
