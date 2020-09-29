@@ -56,7 +56,7 @@ class _Home extends State<Home> with TickerProviderStateMixin {
   @override
   Future<void> initState() {
     super.initState();
-    controller = AnimationController(duration: const Duration(seconds: 5), vsync: this);
+    controller = AnimationController(duration: const Duration(seconds: 1), vsync: this);
     _travelItem = initHome();
   }
 
