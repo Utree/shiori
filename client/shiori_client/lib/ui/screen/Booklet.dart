@@ -41,6 +41,12 @@ class RecommendedItem {
 class _Booklet extends State<Booklet> with TickerProviderStateMixin {
   Future<List<TravelSpot>> _travelSpot;
 //  Future<List<RecommendedItem>> _recommendedItem;
+  // フローティングボタン
+  int _angle = 90;
+  bool _isRotated = true;
+  AnimationController _floatBtnCtrl;
+  Animation<double> _animation;
+  Animation<double> _animation2;
 
   Future<List<TravelSpot>> initBooklet() async {
     final prefs = await SharedPreferences.getInstance();
@@ -78,6 +84,37 @@ class _Booklet extends State<Booklet> with TickerProviderStateMixin {
     super.initState();
     _travelSpot = initBooklet();
 //    _recommendedItem = roadRecommendedItem();
+
+    // フローティングボタン
+    _floatBtnCtrl = new AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+    );
+
+    _animation = new CurvedAnimation(
+      parent: _floatBtnCtrl,
+      curve: new Interval(0.0, 1.0, curve: Curves.linear),
+    );
+
+    _animation2 = new CurvedAnimation(
+      parent: _floatBtnCtrl,
+      curve: new Interval(0.5, 1.0, curve: Curves.linear),
+    );
+    _floatBtnCtrl.reverse();
+  }
+
+  void _rotate(){
+    setState((){
+      if(_isRotated) {
+        _angle = 45;
+        _isRotated = false;
+        _floatBtnCtrl.forward();
+      } else {
+        _angle = 90;
+        _isRotated = true;
+        _floatBtnCtrl.reverse();
+      }
+    });
   }
 
   void openDialog(BuildContext context) {
@@ -206,6 +243,150 @@ class _Booklet extends State<Booklet> with TickerProviderStateMixin {
               return CircularProgressIndicator();
             }
           },
+        ),
+        floatingActionButton: new Stack(
+            children: <Widget>[
+              new Positioned(
+                  bottom: 144.0,
+                  right: 24.0,
+                  child: new Container(
+                    child: new Row(
+                      children: <Widget>[
+                        new ScaleTransition(  // 文字
+                          scale: _animation2,
+                          alignment: FractionalOffset.center,
+                          child: new Container(
+                              margin: new EdgeInsets.only(right: 16.0),
+                              child: Text(
+                                  "画像を追加",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.white,
+                                    locale: Locale('ja'),
+                                    shadows: <Shadow>[
+                                      Shadow(
+                                        offset: Offset(0, 0),
+                                        blurRadius: 5,
+                                        color: Color.fromARGB(255, 0, 0, 0),
+                                      )],))
+                          ),
+                        ),
+
+                        new ScaleTransition(  // アイコン
+                          scale: _animation2,
+                          alignment: FractionalOffset.center,
+                          child: new Material(
+                              color: AppTheme.orange,
+                              type: MaterialType.circle,
+                              elevation: 6.0,
+                              child: new GestureDetector(
+                                child: new Container(
+                                    width: 40.0,
+                                    height: 40.0,
+                                    child: new InkWell(
+                                      onTap: (){
+                                        _rotate();  // トグル
+                                        print("画像を追加");
+                                      },
+                                      child: new Center(
+                                        child: new Icon(
+                                          Icons.add,
+                                          color: AppTheme.white,
+                                        ),
+                                      ),
+                                    )
+                                ),
+                              )
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+              ),
+              new Positioned(
+                  bottom: 88.0,
+                  right: 24.0,
+                  child: new Container(
+                    child: new Row(
+                      children: <Widget>[
+                        new ScaleTransition(
+                          scale: _animation,
+                          alignment: FractionalOffset.center,
+                          child: new Container(
+                              margin: new EdgeInsets.only(right: 16.0),
+                              child: Text(
+                                  "スポットを追加",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.white,
+                                    locale: Locale('ja'),
+                                    shadows: <Shadow>[
+                                      Shadow(
+                                        offset: Offset(0, 0),
+                                        blurRadius: 5,
+                                        color: Color.fromARGB(255, 0, 0, 0),
+                                      )],))
+                          ),
+                        ),
+                        new ScaleTransition(
+                          scale: _animation,
+                          alignment: FractionalOffset.center,
+                          child: new Material(
+                              color: AppTheme.orange,
+                              type: MaterialType.circle,
+                              elevation: 6.0,
+                              child: new GestureDetector(
+                                child: new Container(
+                                    width: 40.0,
+                                    height: 40.0,
+                                    child: new InkWell(
+                                      onTap: (){
+                                        _rotate();
+                                        print("スポットを追加");
+                                      },
+                                      child: new Center(
+                                        child: new Icon(
+                                          Icons.add,
+                                          color: AppTheme.white,
+                                        ),
+                                      ),
+                                    )
+                                ),
+                              )
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+              ),
+              new Positioned(
+                bottom: 16.0,
+                right: 16.0,
+                child: new Material(
+                    color: AppTheme.orange,
+                    type: MaterialType.circle,
+                    elevation: 6.0,
+                    child: new GestureDetector(
+                      child: new Container(
+                          width: 56.0,
+                          height: 56.00,
+                          child: new InkWell(
+                            onTap: _rotate,
+                            child: new Center(
+                                child: new RotationTransition(
+                                  turns: new AlwaysStoppedAnimation(_angle / 360),
+                                  child: new Icon(
+                                    Icons.add,
+                                    color: AppTheme.white,
+                                  ),
+                                )
+                            ),
+                          )
+                      ),
+                    )
+                ),
+              ),
+            ]
         )
     );
   }

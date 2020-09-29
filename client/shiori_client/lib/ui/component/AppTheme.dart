@@ -7,8 +7,10 @@ class AppTheme {
   static const Color orange = Color.fromARGB(255, 225, 119, 0);
   static const Color beige = Color.fromARGB(255, 255, 242, 204);
   static const Color white = Colors.white;
+  static const Color black = Colors.black;
   static const Color blue = Color.fromARGB(255, 48, 175, 255);
   static const Color hint = Color(0xFFE1E1E1);
+  static const Color gray = Color(0xFF9E9E9E);
 }
 enum Answers{
   YES,
