@@ -82,3 +82,5 @@ flutter:
     - family: Chewy
       fonts:
         - asset: fonts/Chewy-Regular.ttf
+  assets:
+    - images/

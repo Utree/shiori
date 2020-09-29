@@ -18,12 +18,12 @@ class _SignupState extends State<Signup> {
             child: new Column(
               mainAxisSize: MainAxisSize.min,  // 画面中央にセンタリング
               children: <Widget>[
-                new Container(margin: EdgeInsets.all(80),), // レイアウト用空白
+                new Container(margin: EdgeInsets.all(25),), // レイアウト用空白
                 new Container(  // アイコン
-                  width: 100,
-                  height: 100,
+                  width: 180,
+                  height: 180,
                   color: AppTheme.white,
-                  child: Text("icon"),
+                  child: Image.asset('images/logo.png'),
                 ),
                 new Text(  // アプリ名
                   AppTheme.AppName,
