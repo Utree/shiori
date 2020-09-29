@@ -10,3 +10,7 @@ class AppTheme {
   static const Color blue = Color.fromARGB(255, 48, 175, 255);
   static const Color hint = Color(0xFFE1E1E1);
 }
+enum Answers{
+  YES,
+  NO
+}
