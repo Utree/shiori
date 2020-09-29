@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shiori_client/ui/screen/AddContent.dart';
+import 'package:shiori_client/ui/screen/AddSpot.dart';
+import 'package:shiori_client/ui/screen/AddTravel.dart';
 import 'package:shiori_client/ui/screen/Booklet.dart';
 import 'package:shiori_client/ui/screen/Splash.dart';
 import 'package:shiori_client/ui/screen/Login.dart';
@@ -17,6 +20,9 @@ void main() {
       '/home': (_) => new Home(),
       '/album': (_) => new Album(),
       '/booklet': (_) => new Booklet(),
+      '/addSpot': (_) => new AddSpot(),
+      '/addTravel': (_) => new AddTravel(),
+      '/addContent': (_) => new AddContent()
     },
   ));
 }

@@ -123,6 +123,9 @@ class _Home extends State<Home> with TickerProviderStateMixin {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         backgroundColor: AppTheme.orange,
+        onPressed: () {
+          Navigator.of(context).pushNamed('/addTravel');
+        },
       ),
     );
   }
