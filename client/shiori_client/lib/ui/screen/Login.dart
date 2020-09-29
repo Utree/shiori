@@ -78,7 +78,7 @@ class _LoginState extends State<Login> {
                         if (snapshot.connectionState == ConnectionState.done) {
                           if (snapshot.data) {
                             // ログイン成功時
-                            return Text("Got data");
+                            return Text("Success");
                           } else {
                             return RaisedButton(
                               // ログインボタン

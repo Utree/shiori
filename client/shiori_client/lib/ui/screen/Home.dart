@@ -11,15 +11,15 @@ class Home extends StatefulWidget {
 class TravelItem {
   int id;
   String name;
-  String createdAt;
+  String period;
   String thumbnailUrl;
 
-  TravelItem(this.id, this.name, this.createdAt, this.thumbnailUrl);
+  TravelItem(this.id, this.name, this.period, this.thumbnailUrl);
 
   TravelItem.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
-    createdAt = json['created_at'];
+    period = json['period'];
     thumbnailUrl = json['thumbnail_url'];
   }
 }
@@ -37,7 +37,14 @@ Future<List<TravelItem>> initHome() async {
   ).then((value) {
     String responseBody = utf8.decode(value.bodyBytes);  // UTF-8に変換
     var tagObjsJson = json.decode(responseBody)['data'] as List;
-    return tagObjsJson.map((tagJson) => TravelItem.fromJson(tagJson)).toList();
+//    return tagObjsJson.map((tagJson) => TravelItem.fromJson(tagJson)).toList();
+    return [
+      TravelItem(1, "箱根旅行", "2020/1/1", "https://www.dropbox.com/s/nb3e9fdxv80dx19/hakone.jpg?raw=1"),
+      TravelItem(2, "沖縄旅行", "2020/1/2", "https://www.dropbox.com/s/r7qrgi3z4qqm973/okinawa.jpg?raw=1"),
+      TravelItem(3, "北海道旅行", "2020/1/3", "https://www.dropbox.com/s/9ebliz8jakptqqi/hokkaido.jpg?raw=1"),
+      TravelItem(4, "修学旅行", "2020/1/4", "https://www.dropbox.com/s/y0kyy2tp0wlqnem/school.jpg?raw=1"),
+      TravelItem(5, "パリ", "2020/1/5", "https://www.dropbox.com/s/evfu6rhx136ej2u/paris.jpg?raw=1"),
+    ];
   });
   return response;
 }
@@ -196,8 +203,8 @@ class HomeItemWidget extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Text(travelData.name, style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
-                                Text(travelData.createdAt)
+                                Text(travelData.name, style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, locale: Locale('ja'))),
+                                Text(travelData.period)
                               ],
                             ),
                           ),
@@ -213,7 +220,7 @@ class HomeItemWidget extends StatelessWidget {
       ),
       onTap: (){
         print(travelData.name + "called");
-        Navigator.of(context).pushNamed('/booklet', arguments: travelData.name+" called"); // ページ遷移
+        Navigator.of(context).pushNamed('/booklet', arguments: travelData.name); // ページ遷移
         },
     );
   }
