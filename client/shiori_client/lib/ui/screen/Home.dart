@@ -77,11 +77,11 @@ class _Home extends State<Home> with TickerProviderStateMixin {
           AppTheme.AppName,
           style: TextStyle(
               fontFamily: "Chewy",
-              fontSize: 40,
-              color: AppTheme.orange
+              fontSize: 35,
+              color: AppTheme.white
           ),
         ),
-        backgroundColor: AppTheme.beige,
+        backgroundColor: AppTheme.orange,
       ),
       body: FutureBuilder<List<TravelItem>>(
         future: _travelItem,
