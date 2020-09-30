@@ -73,7 +73,6 @@ class _Home extends State<Home> with TickerProviderStateMixin {
     return Scaffold(
       backgroundColor: AppTheme.beige,
       appBar: AppBar(
-        toolbarHeight: 90,
         title: Text(
           AppTheme.AppName,
           style: TextStyle(

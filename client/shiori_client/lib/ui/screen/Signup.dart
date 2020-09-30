@@ -45,7 +45,9 @@ class _SignupState extends State<Signup> {
                             new RaisedButton( // サインアップボタン
                                 onPressed:() => {
                                   // TODO: サインアップ処理
+                                  // TODO: サインアップ後、戻るボタンを無効にする
                                   Navigator.of(context).pushReplacementNamed("/home")
+
                                 },
                                 color: AppTheme.blue,
                                 child: new Padding(

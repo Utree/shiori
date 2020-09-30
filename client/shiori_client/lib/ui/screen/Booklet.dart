@@ -258,7 +258,7 @@ class _Booklet extends State<Booklet> with TickerProviderStateMixin {
                           child: new Container(
                               margin: new EdgeInsets.only(right: 16.0),
                               child: Text(
-                                  "画像を追加",
+                                  "コンテンツを追加",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: AppTheme.white,
@@ -286,7 +286,8 @@ class _Booklet extends State<Booklet> with TickerProviderStateMixin {
                                     child: new InkWell(
                                       onTap: (){
                                         _rotate();  // トグル
-                                        print("画像を追加");
+                                        print("コンテンツを追加");
+                                        Navigator.of(context).pushNamed('/addContent');
                                       },
                                       child: new Center(
                                         child: new Icon(
@@ -343,6 +344,7 @@ class _Booklet extends State<Booklet> with TickerProviderStateMixin {
                                       onTap: (){
                                         _rotate();
                                         print("スポットを追加");
+                                        Navigator.of(context).pushNamed('/addSpot');
                                       },
                                       child: new Center(
                                         child: new Icon(

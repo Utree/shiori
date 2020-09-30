@@ -9,7 +9,6 @@ class Album extends StatelessWidget {
     return Scaffold(
         backgroundColor: AppTheme.beige,
         appBar: AppBar(
-          toolbarHeight: 90,
           title: Text(
             args,
             style: TextStyle(
