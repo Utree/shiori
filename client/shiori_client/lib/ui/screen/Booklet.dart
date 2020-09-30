@@ -117,6 +117,47 @@ class _Booklet extends State<Booklet> with TickerProviderStateMixin {
     });
   }
 
+  void showUnlock(BuildContext context, String spt) {
+    showDialog<Answers>(
+        context: context,
+        builder: (BuildContext context) =>
+        new AlertDialog(
+          title: Text("${spt}を解除しました", style: TextStyle(locale: Locale('ja')),),
+          content: SizedBox(
+            width: 200,
+            height: 150,
+            child: Column(
+              children: <Widget>[
+                Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      boxShadow: [BoxShadow(
+                        color: Colors.grey.withOpacity(0.6),
+                        offset: const Offset(4, 4),
+                        blurRadius: 16,)],
+                    ),
+                    child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            color: AppTheme.white
+                        ),
+                        width: 150,
+                        height: 150,
+                        child: Icon(Icons.lock_open, size: 120,))
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("OK"),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        )
+    );
+  }
+
   void showLock(BuildContext context) {
     showDialog<Answers>(
         context: context,
@@ -313,6 +354,7 @@ class _Booklet extends State<Booklet> with TickerProviderStateMixin {
                               return GestureDetector(
                                 onTap: () {
                                   print("called: " + snapshot.data[index-1].name.toString());
+                                  showUnlock(context, snapshot.data[index-1].name.toString());
                                 },
                                 child: Container(
                                     alignment: Alignment.center,
