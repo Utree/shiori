@@ -117,20 +117,124 @@ class _Booklet extends State<Booklet> with TickerProviderStateMixin {
     });
   }
 
-  void openDialog(BuildContext context) {
+  void showLock(BuildContext context) {
+    showDialog<Answers>(
+        context: context,
+        builder: (BuildContext context) =>
+        new AlertDialog(
+          title: Text("ロックしました"),
+          content: SizedBox(
+            width: 200,
+            height: 150,
+            child: Column(
+              children: <Widget>[
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(100),
+                    boxShadow: [BoxShadow(
+                      color: Colors.grey.withOpacity(0.6),
+                      offset: const Offset(4, 4),
+                      blurRadius: 16,)],
+                  ),
+                  child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          color: AppTheme.white
+                      ),
+                      width: 150,
+                      height: 150,
+                      child: Icon(Icons.lock, size: 120))
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("OK"),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        )
+    );
+  }
+
+  void askLock(BuildContext context) {
+    showDialog<Answers>(
+        context: context,
+        builder: (BuildContext context) =>
+        new AlertDialog(
+          title: Text("〇〇年後までロック"),
+          content: TextField(keyboardType: TextInputType.number),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Yes"),
+              onPressed: () {
+                Navigator.pop(context);
+                showLock(context);
+              },
+            ),
+            FlatButton(
+              child: Text("No"),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        )
+    );
+  }
+
+  void showShareLink(BuildContext context) {
     showDialog<Answers>(
       context: context,
       builder: (BuildContext context) =>
-      new SimpleDialog(
-        title: new Text('シェアしますか？'),
-        children: <Widget>[
-          createDialogOption(context, Answers.YES, 'Yes'),
-          createDialogOption(context, Answers.NO, 'No')
+      new AlertDialog(
+        title: Text("以下のURLを共有してください"),
+        content: SizedBox(
+          width: 100,
+            height: 170,
+            child: Column(
+              children: <Widget>[
+                Padding(padding: EdgeInsets.only(bottom: 30),
+                    child:
+                    Icon(Icons.share, size: 100),),
+                Text("https://sample.sample/abc")
+              ],
+            ),
+        ),
+        actions: <Widget>[
+          FlatButton(
+            child: Text("OK"),
+            onPressed: () => Navigator.pop(context),
+          ),
         ],
-      ),
-    ).then((value) {
-      print("Dialog value: " + value.toString());
-    });
+      )
+    );
+  }
+
+  void askShare(BuildContext context) {
+    showDialog<Answers>(
+        context: context,
+        builder: (BuildContext context) =>
+        new AlertDialog(
+          title: Text("シェアしますか?"),
+          content: SizedBox(
+            width: 100,
+            height: 10,
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Yes"),
+              onPressed: () {
+                Navigator.pop(context);
+                showShareLink(context);
+              },
+            ),
+            FlatButton(
+              child: Text("No"),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        )
+    );
   }
 
   createDialogOption(BuildContext context, Answers answer, String str) {
@@ -156,7 +260,13 @@ class _Booklet extends State<Booklet> with TickerProviderStateMixin {
               onSelected: (val) {
                 setState(() {
                   print("called: " + val.toString());
-                  openDialog(context);
+                  if(val == "シェア") {
+                    askShare(context);
+                  } else if(val == "ロック") {
+                    askLock(context);
+                  } else if(val == "アルバム") {
+                    Navigator.of(context).pushNamed("/album", arguments: args);
+                  }
                 });
               },
               itemBuilder: (BuildContext context) {

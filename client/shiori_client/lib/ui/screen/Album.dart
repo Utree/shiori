@@ -8,13 +8,11 @@ class Album extends StatelessWidget {
 
     return Scaffold(
         backgroundColor: AppTheme.beige,
+
         appBar: AppBar(
-          title: Text(
-            args,
-            style: TextStyle(
-                fontFamily: "Chewy", fontSize: 40, color: AppTheme.orange),
-          ),
-          backgroundColor: AppTheme.beige,
+          title: Text("${args}のアルバム", style: TextStyle(locale: Locale('ja')),),
+          elevation: 0.0,
+          backgroundColor: AppTheme.orange,
         ),
         body: GridView.count(
           crossAxisCount: 3, // 1行に表示する数
