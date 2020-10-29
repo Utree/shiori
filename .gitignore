@@ -204,3 +204,4 @@ fabric.properties
 # End of https://www.toptal.com/developers/gitignore/api/flutter,androidstudio
 
 !/client/shiori_client/lib
+server/uploaded_file/
