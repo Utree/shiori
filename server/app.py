@@ -138,17 +138,20 @@ def get_current_user(
     """ トークン認証しユーザー情報を返す
     """
     try:
-        # tokenを取得
-        print(cred.credentials)
-        # TODO: tokenを使ってdbにuser名を参照し認証
-        user = SignupInfo(name="user1", email="a@a.com", password="aaa")
+        # token認証
+        with session_scope() as s:
+            u = s.query(Token).filter(Token.token == cred.credentials).first()
+            # userがいる場合
+            if u:
+                return u.user_id
+            else:
+                raise Exception
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Invalid authentication credentials',
             headers={'WWW-Authenticate': 'Bearer'},
             )
-    return user
 
 
 @app.get("/travels", response_model=TravelInfo)
@@ -156,6 +159,7 @@ async def get_travel_list(current_user=Depends(get_current_user)):
     """ ユーザーが持つ旅行の一覧を参照
     """
     # TODO: DBからユーザーが持つtravelの一覧を参照
+    print(current_user)
     sample_data = TravelInfo(
         data=[
             TravelItem(id=0, name="箱根旅行", period="2020/1/1",
