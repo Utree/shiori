@@ -1,4 +1,4 @@
-from db import (session_scope, User, Travel, Spot, Recomend, TravelUser,
+from init_db import (session_scope, User, Travel, Spot, Recomend, TravelUser,
                 MemoryContent)
 import bcrypt
 import datetime
@@ -10,11 +10,11 @@ password = "password".encode()
 hashed_passwd = bcrypt.hashpw(password, salt)
 # userを追加
 user_samples = [
-    User(name='ken', mail='ken@sample.com', password=hashed_passwd),
-    User(name='susan', mail='susan@sample.org', password=hashed_passwd),
-    User(name='leo', mail='leo@sample.jp', password=hashed_passwd),
-    User(name='edd', mail='edd@sample.co.jp', password=hashed_passwd),
-    User(name='queen', mail='queen@sample.co', password=hashed_passwd)
+    User(name='ken', email='ken@example.com', password=hashed_passwd),
+    User(name='susan', email='susan@example.org', password=hashed_passwd),
+    User(name='leo', email='leo@example.jp', password=hashed_passwd),
+    User(name='edd', email='edd@example.co.jp', password=hashed_passwd),
+    User(name='queen', email='queen@example.co', password=hashed_passwd)
     ]
 with session_scope() as s:
     for us in user_samples:

@@ -56,7 +56,7 @@ class User(Base):
     __tablename__ = 'user'
     id = Column('id', Integer, primary_key=True)
     name = Column('name', String(200))
-    mail = Column('mail', String(200))
+    email = Column('email', String(200), unique=True)
     password = Column('password', String(200))
     created_at = Column('created_at', TIMESTAMP,
                         server_default=current_timestamp())
@@ -108,7 +108,7 @@ class Recomend(Base):
 class Token(Base):
     __tablename__ = 'token'
     id = Column('id', Integer, primary_key=True)
-    token = Column('token', String(200))
+    token = Column('token', String(200), unique=True)
     user_id = Column('user_id', Integer,
                      ForeignKey('user.id', onupdate='CASCADE',
                                 ondelete='CASCADE'))
