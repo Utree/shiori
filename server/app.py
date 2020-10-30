@@ -7,6 +7,9 @@ import pathlib
 from datetime import datetime as dt
 from starlette.responses import FileResponse
 from os.path import isfile
+from init_db import session_scope, User, Token
+import bcrypt
+from secrets import token_urlsafe
 
 app = FastAPI()
 
@@ -82,25 +85,52 @@ async def hello():
 async def login(user: LoginInfo):
     """ ログイン
     """
-    # TODO: ログイン処理を実装
-    email = user.email
-    password = user.password
-    print(f"DEBUG[login]\temail: {email}, passwd: {password}")
-
-    return {'access_token': "#####"}
+    # dbから参照
+    with session_scope() as s:
+        u = s.query(User).filter(User.email == user.email).first()
+        # userがいない場合
+        if not u:
+            return {"status": "failed"}
+        user_id = u.id
+        saved_password = u.password
+    # 認証
+    if saved_password:
+        if bcrypt.checkpw(user.password.encode(), saved_password.encode()):
+            # ログイン成功後トークンを記録/伝達
+            tkn = token_urlsafe(16)
+            with session_scope() as s:
+                s.add(Token(token=tkn, user_id=user_id))
+            return {"status": "success", "access_token": f"{tkn}"}
+    return {"status": "failed"}
 
 
 @app.post("/signup")
 async def signup(user: SignupInfo):
     """ サインアップ
     """
-    # TODO: サインアップ処理を実装
-    name = user.name
-    email = user.email
-    password = user.password
-    print(f"DEBUG[login]\tname: {name}, email: {email}, passwd: {password}")
-
-    return {'access_token': "#####"}
+    # dbから参照
+    with session_scope() as s:
+        u = s.query(User).filter(User.email == user.email).first()
+        # すでに登録者がいる場合
+        if u:
+            return {"status": "failed"}
+    # ユーザー登録
+    # パスワードのハッシュ化
+    salt = bcrypt.gensalt(rounds=10, prefix=b'2a')
+    hashed_passwd = bcrypt.hashpw(user.password.encode(), salt)
+    # userを追加
+    with session_scope() as s:
+        s.add(User(name=user.name, email=user.email, password=hashed_passwd))
+    # user.idを参照
+    with session_scope() as s:
+        u = s.query(User).filter(User.email == user.email).first()
+        user_id = u.id
+        tkn = token_urlsafe(16)
+    # tokenを発行
+    with session_scope() as s:
+        s.add(Token(token=tkn, user_id=user_id))
+        return {"status": "success", "access_token": f"{tkn}"}
+    return {"status": "failed"}
 
 
 def get_current_user(
