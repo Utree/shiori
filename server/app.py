@@ -66,6 +66,11 @@ class ContentItem(BaseModel):
     file_url: str
 
 
+class ContentRequest(BaseModel):
+    spot_id: int
+    content_url: str
+
+
 class SpotInfo(BaseModel):
     """ スポット情報返却項目"""
 
@@ -307,13 +312,17 @@ async def add_spot(spot: SpotRequest):
 
 
 @app.post("/add_content")
-async def add_content(content: ContentItem):
+async def add_content(content: ContentRequest):
     """ スポットに紐付けられたコンテンツを追加する
     """
-    # TODO: DBにアルバムを追加
-    file_url = content.file_url
-
-    print(f"DEBUG[add_content]\tfile_url: {file_url}")
+    s = MemoryContent(spot_id=content.spot_id,
+                      content_url=f"{content.content_url}")
+    try:
+        with session_scope() as ss:
+            ss.add(s)
+        return "success"
+    except:
+        return "failed"
 
 
 @app.post("/uploadfile")
