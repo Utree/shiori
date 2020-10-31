@@ -205,7 +205,8 @@ async def get_recomend_list(latitude: float, longitude: float):
     with session_scope() as s:
         # 内部結合
         for d in s.execute(t):
-            result.data.append(RecomendItem(name=f"{d.name}", thumbnail_url=f"{d.content_url}"))
+            result.data.append(RecomendItem(name=f"{d.name}",
+                                            thumbnail_url=f"{d.content_url}"))
     return result
 
 
@@ -213,22 +214,30 @@ async def get_recomend_list(latitude: float, longitude: float):
 async def get_spot_list(travel_id: int):
     """ spotsを返す
     """
-    # TODO: DBからspotの一覧を参照
-    sample_data = SpotInfo(
-        data=[
-            SpotItem(
-                id=1, name="aaa", created_at="2020/1/1",
-                latitude=1.111, longitude=1.111,
-                thumbnail_url="https://picsum.photos/250?image=50"
-                ),
-            SpotItem(
-                id=1, name="bbb", created_at="2020/1/1",
-                latitude=1.111, longitude=1.111,
-                thumbnail_url="https://picsum.photos/250?image=50"
-                )
-            ])
-
-    return sample_data
+    # travel_idを使ってSpotを参照
+    result = SpotInfo(data=[])
+    with session_scope() as s:
+        data = s.query(Spot).filter(Spot.travel_id == travel_id).all()
+        if data:
+            for d in data:
+                # SpotとMemoryContentを内部結合してサムネイルを生成
+                spt = s.query(Spot, MemoryContent).join(
+                    MemoryContent).filter(Spot.travel_id == d.id).first()
+                if spt:
+                    result.data.append(
+                        SpotItem(id=d.id, name=f"{d.name}",
+                                 created_at=f"{d.created_at}",
+                                 latitude=f"{d.latitude}",
+                                 longitude=f"{d.longitude}",
+                                 thumbnail_url=f"{spt[1].content_url}"))
+                else:
+                    result.data.append(
+                        SpotItem(id=d.id, name=f"{d.name}",
+                                 created_at=f"{d.created_at}",
+                                 latitude=f"{d.latitude}",
+                                 longitude=f"{d.longitude}",
+                                 thumbnail_url=""))
+    return result
 
 
 @app.get("/contents", response_model=ContentInfo)
