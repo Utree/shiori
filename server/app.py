@@ -121,11 +121,10 @@ async def signup(user: SignupInfo):
     salt = bcrypt.gensalt(rounds=10, prefix=b'2a')
     hashed_passwd = bcrypt.hashpw(user.password.encode(), salt)
     # userを追加
+    u = User(name=user.name, email=user.email, password=hashed_passwd)
     with session_scope() as s:
-        s.add(User(name=user.name, email=user.email, password=hashed_passwd))
-    # user.idを参照
-    with session_scope() as s:
-        u = s.query(User).filter(User.email == user.email).first()
+        s.add(u)
+        s.commit()
         user_id = u.id
         tkn = token_urlsafe(16)
     # tokenを発行
