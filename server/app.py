@@ -11,6 +11,7 @@ from init_db import (session_scope, User, Token, TravelUser, Travel,
                      Spot, MemoryContent)
 import bcrypt
 from secrets import token_urlsafe
+from sqlalchemy.sql import text
 
 app = FastAPI()
 
@@ -186,22 +187,26 @@ async def get_travel_list(current_user=Depends(get_current_user)):
 async def get_recomend_list(latitude: float, longitude: float):
     """ recomendsを返す
     """
-    # TODO: DBからユーザーが持つtravelの一覧を参照
-    sample_data = RecomendInfo(
-        data=[
-            RecomendItem(name="タワー",
-                         thumbnail_url="https://picsum.photos/250?image=5"),
-            RecomendItem(name="遊園地",
-                         thumbnail_url="https://picsum.photos/250?image=10"),
-            RecomendItem(name="動物園",
-                         thumbnail_url="https://picsum.photos/250?image=11"),
-            RecomendItem(name="ショッピングモール",
-                         thumbnail_url="https://picsum.photos/250?image=20"),
-            RecomendItem(name="この世",
-                         thumbnail_url="https://picsum.photos/250?image=50")
-            ])
-
-    return sample_data
+    result = RecomendInfo(data=[])
+    # 緯度経度情報から近いスポット５個をピックアップ
+    t = text(f"""
+    SELECT id, name, content_url, latitude, longitude,
+      (
+        6371 * acos( -- kmの場合は6371、mileの場合は3959
+          cos(radians({latitude}))
+          * cos(radians(latitude))
+          * cos(radians(longitude) - radians({longitude}))
+          + sin(radians({latitude}))
+          * sin(radians(latitude))
+        )
+      ) AS distance
+    FROM recomend ORDER BY distance LIMIT 5;
+    """)
+    with session_scope() as s:
+        # 内部結合
+        for d in s.execute(t):
+            result.data.append(RecomendItem(name=f"{d.name}", thumbnail_url=f"{d.content_url}"))
+    return result
 
 
 @app.get("/spots", response_model=SpotInfo)

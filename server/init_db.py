@@ -98,6 +98,7 @@ class Spot(Base):
 class Recomend(Base):
     __tablename__ = 'recomend'
     id = Column('id', Integer, primary_key=True)
+    name = Column('name', String(200))
     latitude = Column('latitude', Float)
     longitude = Column('longitude', Float)
     content_url = Column('content_url', String(200))
