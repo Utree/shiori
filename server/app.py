@@ -269,15 +269,19 @@ async def get_content(name: str):
 
 
 @app.post("/add_travel")
-async def add_travel(travel: TravelItem):
+async def add_travel(travel: str,
+                     current_user=Depends(get_current_user)):
     """ 旅行のアルバムを作成する
     """
-    # TODO: DBにアルバムを追加
-
-    name = travel.name
-    period = travel.period
-
-    print(f"DEBUG[add_travel]\tname: {name}, period: {period}")
+    # DBにアルバムを追加
+    t = Travel(title=f"{travel}")
+    with session_scope() as s:
+        s.add(t)
+        s.commit()
+        tid = t.id
+    with session_scope() as s:
+        s.add(TravelUser(user_id=current_user, travel_id=tid))
+    return "succeed"
 
 
 @app.post("/add_spot")
