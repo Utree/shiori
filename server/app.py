@@ -12,7 +12,6 @@ from init_db import (session_scope, User, Token, TravelUser, Travel,
 import bcrypt
 from secrets import token_urlsafe
 from sqlalchemy.sql import text
-import datetime
 
 app = FastAPI()
 
