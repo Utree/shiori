@@ -7,7 +7,8 @@ import pathlib
 from datetime import datetime as dt
 from starlette.responses import FileResponse
 from os.path import isfile
-from init_db import session_scope, User, Token
+from init_db import (session_scope, User, Token, TravelUser, Travel,
+                     Spot, MemoryContent)
 import bcrypt
 from secrets import token_urlsafe
 
@@ -160,21 +161,25 @@ async def get_travel_list(current_user=Depends(get_current_user)):
     """
     # TODO: DBからユーザーが持つtravelの一覧を参照
     print(current_user)
-    sample_data = TravelInfo(
-        data=[
-            TravelItem(id=0, name="箱根旅行", period="2020/1/1",
-                       thumbnail_url="https://picsum.photos/250?image=5"),
-            TravelItem(id=3, name="沖縄旅行", period="2020/1/2",
-                       thumbnail_url="https://picsum.photos/250?image=10"),
-            TravelItem(id=10, name="北海道旅行", period="2020/1/3",
-                       thumbnail_url="https://picsum.photos/250?image=11"),
-            TravelItem(id=15, name="修学旅行", period="2020/1/4",
-                       thumbnail_url="https://picsum.photos/250?image=20"),
-            TravelItem(id=80, name="パリ", period="2020/1/5",
-                       thumbnail_url="https://picsum.photos/250?image=50")
-            ])
-
-    return sample_data
+    result = TravelInfo(data=[])
+    with session_scope() as s:
+        # TravelUserとTravelを内部結合してUserから所有するTravelを参照
+        data = s.query(TravelUser, Travel).join(Travel).filter(
+            TravelUser.user_id == current_user).all()
+        for d in data:
+            # SpotとMemoryContentを内部結合してサムネイルを生成
+            spt = s.query(Spot, MemoryContent).join(
+                MemoryContent).filter(Spot.travel_id == d[1].id).first()
+            if spt:
+                result.data.append(TravelItem(
+                    id=d[1].id, name=f"{d[1].title}",
+                    period=f"{d[1].created_at}",
+                    thumbnail_url=f"{spt[1].content_url}"))
+            else:
+                result.data.append(TravelItem(
+                    id=d[1].id, name=f"{d[1].title}",
+                    period=f"{d[1].created_at}", thumbnail_url=""))
+    return result
 
 
 @app.get("/recomends", response_model=RecomendInfo)
