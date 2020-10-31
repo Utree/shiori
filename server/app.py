@@ -12,6 +12,7 @@ from init_db import (session_scope, User, Token, TravelUser, Travel,
 import bcrypt
 from secrets import token_urlsafe
 from sqlalchemy.sql import text
+import datetime
 
 app = FastAPI()
 
@@ -49,6 +50,14 @@ class SpotItem(BaseModel):
     latitude: float
     longitude: float
     thumbnail_url: str
+
+
+class SpotRequest(BaseModel):
+    name: str
+    arrived_at: str
+    latitude: float
+    longitude: float
+    travel_id: int
 
 
 class ContentItem(BaseModel):
@@ -285,16 +294,16 @@ async def add_travel(travel: str,
 
 
 @app.post("/add_spot")
-async def add_spot(spot: SpotItem):
+async def add_spot(spot: SpotRequest):
     """ 旅行のアルバムに紐付けられたスポットを追加する
     """
-    # TODO: DBにアルバムを追加
-
-    name = spot.name
-    # latitude = spot.float
-    # longitude = spot.float
-
-    print(f"DEBUG[add_travel]\tname: {name}")
+    s = Spot(name=f"{spot.name}", latitude=spot.latitude,
+             longitude=spot.longitude, travel_id=spot.travel_id,
+             arrived_at=dt.strptime(spot.arrived_at, '%Y-%m-%d %H:%M:%S')
+             )
+    with session_scope() as ss:
+        ss.add(s)
+    return "success"
 
 
 @app.post("/add_content")
