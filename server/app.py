@@ -185,6 +185,7 @@ async def get_travel_list(current_user=Depends(get_current_user)):
 
 @app.get("/recomends", response_model=RecomendInfo)
 async def get_recomend_list(latitude: float, longitude: float):
+    # TODO: TOKEN認証
     """ recomendsを返す
     """
     result = RecomendInfo(data=[])
@@ -212,6 +213,7 @@ async def get_recomend_list(latitude: float, longitude: float):
 
 @app.get("/spots", response_model=SpotInfo)
 async def get_spot_list(travel_id: int):
+    # TODO: TOKEN認証
     """ spotsを返す
     """
     # travel_idを使ってSpotを参照
@@ -242,22 +244,21 @@ async def get_spot_list(travel_id: int):
 
 @app.get("/contents", response_model=ContentInfo)
 async def get_content_list(travel_id: int):
+    # TODO: TOKEN認証
     """ contentsを返す
     """
-    # TODO: DBからcontentの一覧を参照
-    sample_data = ContentInfo(
-        data=[
-            ContentItem(
-                id=1, spot_id=1,
-                file_url="https://picsum.photos/250?image=50"
-                ),
-            ContentItem(
-                id=1, spot_id=1,
-                file_url="https://picsum.photos/250?image=50"
-                ),
-            ])
-
-    return sample_data
+    # travel_idを使ってSpotを参照
+    result = ContentInfo(data=[])
+    with session_scope() as s:
+        # SpotとMemoryContentを内部結合してcontent一覧を生成
+        data = s.query(Spot, MemoryContent).join(
+            MemoryContent).filter(Spot.travel_id == travel_id).all()
+        for d in data:
+            result.data.append(
+                ContentItem(
+                    id=d[1].id, spot_id=d[0].id, file_url=f"{d[1].content_url}"
+                    ))
+    return result
 
 
 @app.get("/content")
